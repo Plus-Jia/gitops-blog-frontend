@@ -1,0 +1,27 @@
+---
+title: "第一篇博客"
+description: "这是第一篇测试文章"
+pubDate: 2026-06-15
+updatedDate: 2026-06-15
+tags: ["Astro", "GitOps"]
+category: "云原生"
+cover: "/uploads/cover.png"
+draft: false
+featured: false
+---
+
+欢迎来到第一篇博客。
+
+这个站点使用 Astro 构建，并通过 Content Collections 管理文章元数据。
+MDX 让文章可以同时拥有 Markdown 的书写体验和组件化扩展能力。
+
+## 已完成内容
+
+- 首页展示最新文章
+- 博客列表展示所有已发布文章
+- 详情页渲染 MDX 正文
+- `draft: true` 的文章不会出现在前台页面中
+
+```ts
+const stack = ["Astro", "MDX", "Content Collections"];
+```

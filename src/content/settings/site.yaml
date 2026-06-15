@@ -1,0 +1,10 @@
+siteName: GitOps Blog
+description: 一个使用 Astro、MDX 和 Keystatic 构建的 GitOps 博客。
+navigation:
+  - label: 首页
+    href: /
+  - label: 博客
+    href: /blog
+  - label: 关于
+    href: /about
+socialLinks: []

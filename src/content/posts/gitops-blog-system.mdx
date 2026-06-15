@@ -1,0 +1,26 @@
+---
+title: "GitOps 博客系统"
+description: "使用 Astro 搭建 GitOps 风格的内容发布系统"
+pubDate: 2026-06-15
+updatedDate: 2026-06-15
+tags: ["Astro", "GitOps"]
+category: "云原生"
+cover: "/uploads/cover.png"
+draft: false
+featured: true
+---
+
+GitOps 的核心思想是把系统期望状态放进 Git，再通过自动化流程完成同步。
+博客内容也可以用类似方式管理：文章进入仓库，构建流程生成静态页面，部署平台发布最新版本。
+
+## 当前阶段
+
+阶段 1 聚焦基础能力：
+
+- Astro 项目初始化
+- MDX 支持
+- Content Collections schema
+- 首页、列表页、详情页和关于页
+- 基于 `draft` 字段过滤草稿内容
+
+后续可以继续加入标签页、分类页、RSS、站点地图和部署流水线。

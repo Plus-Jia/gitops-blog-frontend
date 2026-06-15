@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../layouts/Layout.astro';
+import Layout from '../../layouts/Layout.astro';
 
-const posts = (await getCollection('posts', ({ data }) => !data.draft))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 3);
+const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
 
 const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
 	year: 'numeric',
@@ -13,17 +13,14 @@ const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
 });
 ---
 
-<Layout title="GitOps Blog" description="记录云原生、GitOps 与工程实践的 Astro 博客">
+<Layout title="博客列表 | GitOps Blog" description="全部已发布博客文章">
 	<section>
-		<p class="eyebrow">Astro + MDX</p>
-		<h1 class="page-title">记录云原生与 GitOps 实践</h1>
-		<p class="lede">
-			一个干净的 Astro 博客起点，使用 Content Collections 管理文章，
-			支持 MDX 内容和草稿过滤。
-		</p>
+		<p class="eyebrow">Blog</p>
+		<h1 class="page-title">博客文章</h1>
+		<p class="lede">这里展示所有非草稿文章，按发布时间倒序排列。</p>
 	</section>
 
-	<section class="post-grid" aria-label="最新文章">
+	<section class="post-grid" aria-label="博客文章列表">
 		{
 			posts.map((post) => (
 				<a class="post-card" href={`/blog/${post.id}`}>
