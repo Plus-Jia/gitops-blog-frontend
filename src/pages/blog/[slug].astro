@@ -30,6 +30,11 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
 			</a>
 			<h1>{post.data.title}</h1>
 			<p class="lede">{post.data.description}</p>
+			{
+				post.data.cover && (
+					<img class="article-cover" src={post.data.cover} alt="" loading="eager" />
+				)
+			}
 			<div class="post-meta">
 				<time datetime={post.data.pubDate.toISOString()}>
 					发布于 {dateFormatter.format(post.data.pubDate)}

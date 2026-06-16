@@ -9,6 +9,13 @@ const { post } = Astro.props;
 ---
 
 <article class="post-card">
+	{
+		post.data.cover && (
+			<a class="post-cover" href={`/blog/${post.id}`} aria-label={post.data.title}>
+				<img src={post.data.cover} alt="" loading="lazy" />
+			</a>
+		)
+	}
 	<div class="post-card-link">
 		<div>
 			<a class="category-link" href={`/categories/${encodeURIComponent(post.data.category)}`}>
