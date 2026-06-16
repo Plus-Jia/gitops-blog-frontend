@@ -26,4 +26,28 @@ const authors = defineCollection({
 	}),
 });
 
-export const collections = { posts, authors };
+const settings = defineCollection({
+	loader: glob({ pattern: '**/*.{json,yaml,yml}', base: './src/content/settings' }),
+	schema: z.object({
+		siteName: z.string(),
+		description: z.string(),
+		navigation: z
+			.array(
+				z.object({
+					label: z.string(),
+					href: z.string(),
+				}),
+			)
+			.default([]),
+		socialLinks: z
+			.array(
+				z.object({
+					label: z.string(),
+					url: z.string(),
+				}),
+			)
+			.default([]),
+	}),
+});
+
+export const collections = { posts, authors, settings };

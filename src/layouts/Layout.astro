@@ -1,13 +1,29 @@
 ---
+import { getCollection } from 'astro:content';
+
 interface Props {
 	title?: string;
 	description?: string;
+	ogType?: 'website' | 'article';
 }
 
+const settings = await getCollection('settings');
+const site = settings.find((entry) => entry.id === 'site')?.data;
 const {
-	title = 'GitOps Blog',
-	description = '一个使用 Astro 和 MDX 构建的博客',
+	title = site?.siteName ?? 'GitOps Blog',
+	description = site?.description ?? '一个使用 Astro 和 MDX 构建的博客',
+	ogType = 'website',
 } = Astro.props;
+const siteName = site?.siteName ?? 'GitOps Blog';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin);
+const navigation = site?.navigation?.length
+	? site.navigation
+	: [
+			{ label: '首页', href: '/' },
+			{ label: '博客', href: '/blog' },
+			{ label: '标签', href: '/tags' },
+			{ label: '关于', href: '/about' },
+		];
 ---
 
 <!doctype html>
@@ -19,15 +35,23 @@ const {
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="description" content={description} />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="canonical" href={canonicalUrl} />
+		<meta property="og:type" content={ogType} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:site_name" content={siteName} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
 		<title>{title}</title>
 	</head>
 	<body>
 		<header class="site-header">
 			<nav class="nav">
-				<a class="brand" href="/">GitOps Blog</a>
+				<a class="brand" href="/">{siteName}</a>
 				<div class="nav-links">
-					<a href="/blog">博客</a>
-					<a href="/about">关于</a>
+					{navigation.map((item) => <a href={item.href}>{item.label}</a>)}
 				</div>
 			</nav>
 		</header>
@@ -138,15 +162,21 @@ const {
 	}
 
 	:global(.post-card) {
+		border: 1px solid #dfddd4;
+		border-radius: 8px;
+		background: #ffffff;
+		box-shadow: 0 14px 30px rgba(31, 41, 51, 0.06);
+		transition:
+			border-color 160ms ease,
+			transform 160ms ease;
+	}
+
+	:global(.post-card-link) {
 		display: flex;
 		min-height: 232px;
 		flex-direction: column;
 		justify-content: space-between;
-		border: 1px solid #dfddd4;
-		border-radius: 8px;
 		padding: 22px;
-		background: #ffffff;
-		box-shadow: 0 14px 30px rgba(31, 41, 51, 0.06);
 	}
 
 	:global(.post-card:hover) {
@@ -164,6 +194,21 @@ const {
 		margin: 0;
 		color: #52606d;
 		line-height: 1.65;
+	}
+
+	:global(.category-link) {
+		display: inline-flex;
+		margin-bottom: 10px;
+		color: #0f766e;
+		font-size: 0.86rem;
+		font-weight: 720;
+		letter-spacing: 0;
+		text-transform: uppercase;
+	}
+
+	:global(.category-link:hover) {
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 
 	:global(.post-meta) {
@@ -191,8 +236,44 @@ const {
 		font-size: 0.82rem;
 	}
 
+	:global(a.tag:hover) {
+		border-color: #0f766e;
+		color: #0f766e;
+	}
+
+	:global(.term-list) {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 12px;
+		margin-top: 32px;
+	}
+
+	:global(.term-card) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border: 1px solid #dfddd4;
+		border-radius: 8px;
+		padding: 16px 18px;
+		background: #fff;
+		color: #2f3a45;
+	}
+
+	:global(.term-card:hover) {
+		border-color: #0f766e;
+		color: #0f766e;
+	}
+
+	:global(.term-count) {
+		color: #697586;
+		font-size: 0.9rem;
+	}
+
 	:global(.article) {
-		max-width: 760px;
+		display: grid;
+		grid-template-columns: minmax(0, 760px) 220px;
+		gap: 44px;
+		align-items: start;
 	}
 
 	:global(.article h1) {
@@ -200,6 +281,67 @@ const {
 		font-size: clamp(2.1rem, 6vw, 4rem);
 		line-height: 1.04;
 		letter-spacing: 0;
+	}
+
+	:global(.article-main) {
+		min-width: 0;
+	}
+
+	:global(.article-author) {
+		display: flex;
+		gap: 12px;
+		align-items: center;
+		border-top: 1px solid #dfddd4;
+		margin-top: 26px;
+		padding-top: 18px;
+		color: #52606d;
+	}
+
+	:global(.author-avatar) {
+		width: 44px;
+		height: 44px;
+		border-radius: 50%;
+		object-fit: cover;
+		background: #e8e4da;
+	}
+
+	:global(.author-name) {
+		margin: 0;
+		color: #1f2933;
+		font-weight: 720;
+	}
+
+	:global(.author-bio) {
+		margin: 3px 0 0;
+		font-size: 0.92rem;
+		line-height: 1.5;
+	}
+
+	:global(.toc) {
+		position: sticky;
+		top: 24px;
+		border-left: 1px solid #dfddd4;
+		padding-left: 18px;
+		color: #52606d;
+		font-size: 0.92rem;
+	}
+
+	:global(.toc-title) {
+		margin: 0 0 12px;
+		color: #1f2933;
+		font-weight: 760;
+	}
+
+	:global(.toc ol) {
+		display: grid;
+		gap: 8px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	:global(.toc a:hover) {
+		color: #0f766e;
 	}
 
 	:global(.article-content) {
@@ -215,12 +357,43 @@ const {
 		text-underline-offset: 3px;
 	}
 
+	:global(.article-content h2),
+	:global(.article-content h3),
+	:global(.article-content h4) {
+		margin-top: 2.2em;
+		color: #1f2933;
+		letter-spacing: 0;
+		line-height: 1.25;
+	}
+
+	:global(.article-content img) {
+		max-width: 100%;
+		border-radius: 8px;
+		border: 1px solid #dfddd4;
+	}
+
+	:global(.article-content code) {
+		border-radius: 5px;
+		padding: 0.16em 0.36em;
+		background: #e9f2ef;
+		color: #0f5f59;
+		font-size: 0.92em;
+	}
+
 	:global(.article-content pre) {
 		overflow-x: auto;
 		border-radius: 8px;
-		padding: 16px;
+		border: 1px solid #26323a;
+		padding: 18px;
 		background: #172026;
 		color: #f8fafc;
+	}
+
+	:global(.article-content pre code) {
+		padding: 0;
+		background: transparent;
+		color: inherit;
+		font-size: 0.95rem;
 	}
 
 	@media (max-width: 640px) {
@@ -232,6 +405,20 @@ const {
 			align-items: flex-start;
 			flex-direction: column;
 			gap: 12px;
+		}
+	}
+
+	@media (max-width: 900px) {
+		:global(.article) {
+			display: block;
+		}
+
+		:global(.toc) {
+			position: static;
+			margin-top: 30px;
+			border-left: 0;
+			border-top: 1px solid #dfddd4;
+			padding: 18px 0 0;
 		}
 	}
 </style>

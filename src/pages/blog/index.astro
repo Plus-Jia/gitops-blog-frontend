@@ -1,16 +1,11 @@
 ---
-import { getCollection } from 'astro:content';
+import PostCard from '../../components/PostCard.astro';
 import Layout from '../../layouts/Layout.astro';
+import { getAllCategories, getAllTags, getPublishedPosts } from '../../lib/content';
 
-const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-
-const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
-	year: 'numeric',
-	month: 'long',
-	day: 'numeric',
-});
+const posts = await getPublishedPosts();
+const tags = getAllTags(posts);
+const categories = getAllCategories(posts);
 ---
 
 <Layout title="博客列表 | GitOps Blog" description="全部已发布博客文章">
@@ -20,30 +15,47 @@ const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
 		<p class="lede">这里展示所有非草稿文章，按发布时间倒序排列。</p>
 	</section>
 
+	<section class="filters" aria-label="文章筛选入口">
+		<div>
+			<h2>标签</h2>
+			<div class="tag-list">
+				{tags.map((tag) => <a class="tag" href={`/tags/${encodeURIComponent(tag.name)}`}>{tag.name}</a>)}
+			</div>
+		</div>
+		<div>
+			<h2>分类</h2>
+			<div class="tag-list">
+				{
+					categories.map((category) => (
+						<a class="tag" href={`/categories/${encodeURIComponent(category.name)}`}>
+							{category.name}
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
 	<section class="post-grid" aria-label="博客文章列表">
-		{
-			posts.map((post) => (
-				<a class="post-card" href={`/blog/${post.id}`}>
-					<div>
-						<p class="eyebrow">{post.data.category}</p>
-						<h2>{post.data.title}</h2>
-						<p>{post.data.description}</p>
-					</div>
-					<div>
-						<div class="tag-list">
-							{post.data.tags.map((tag) => (
-								<span class="tag">{tag}</span>
-							))}
-						</div>
-						<div class="post-meta">
-							<time datetime={post.data.pubDate.toISOString()}>
-								{dateFormatter.format(post.data.pubDate)}
-							</time>
-							{post.data.featured && <span>精选</span>}
-						</div>
-					</div>
-				</a>
-			))
-		}
+		{posts.map((post) => <PostCard post={post} />)}
 	</section>
 </Layout>
+
+<style>
+	.filters {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 24px;
+		margin-top: 34px;
+		border: 1px solid #dfddd4;
+		border-radius: 8px;
+		padding: 20px;
+		background: #fff;
+	}
+
+	.filters h2 {
+		margin: 0 0 12px;
+		font-size: 1rem;
+		letter-spacing: 0;
+	}
+</style>

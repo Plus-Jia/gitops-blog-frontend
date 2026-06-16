@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { dateFormatter, getPrimaryAuthor } from '../../lib/content';
 
 export async function getStaticPaths() {
 	const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -12,37 +13,89 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
-
-const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
-	year: 'numeric',
-	month: 'long',
-	day: 'numeric',
-});
+const { Content, headings } = await render(post);
+const author = await getPrimaryAuthor();
+const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
 ---
 
-<Layout title={`${post.data.title} | GitOps Blog`} description={post.data.description}>
+<Layout
+	title={`${post.data.title} | GitOps Blog`}
+	description={post.data.description}
+	ogType="article"
+>
 	<article class="article">
-		<p class="eyebrow">{post.data.category}</p>
-		<h1>{post.data.title}</h1>
-		<p class="lede">{post.data.description}</p>
-		<div class="post-meta">
-			<time datetime={post.data.pubDate.toISOString()}>
-				发布于 {dateFormatter.format(post.data.pubDate)}
-			</time>
+		<div class="article-main">
+			<a class="category-link" href={`/categories/${encodeURIComponent(post.data.category)}`}>
+				{post.data.category}
+			</a>
+			<h1>{post.data.title}</h1>
+			<p class="lede">{post.data.description}</p>
+			<div class="post-meta">
+				<time datetime={post.data.pubDate.toISOString()}>
+					发布于 {dateFormatter.format(post.data.pubDate)}
+				</time>
+				{
+					post.data.updatedDate && (
+						<time datetime={post.data.updatedDate.toISOString()}>
+							更新于 {dateFormatter.format(post.data.updatedDate)}
+						</time>
+					)
+				}
+				{post.data.featured && <span>精选</span>}
+			</div>
 			{
-				post.data.updatedDate && (
-					<time datetime={post.data.updatedDate.toISOString()}>
-						更新于 {dateFormatter.format(post.data.updatedDate)}
-					</time>
+				post.data.tags.length > 0 && (
+					<div class="tag-list">
+						{post.data.tags.map((tag) => (
+							<a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+								{tag}
+							</a>
+						))}
+					</div>
 				)
 			}
+			{
+				author && (
+					<div class="article-author">
+						{author.data.avatar ? (
+							<img
+								class="author-avatar"
+								src={author.data.avatar}
+								alt={`${author.data.name} 的头像`}
+							/>
+						) : (
+							<div class="author-avatar" aria-hidden="true" />
+						)}
+						<div>
+							<p class="author-name">{author.data.name}</p>
+							{author.data.bio && <p class="author-bio">{author.data.bio}</p>}
+						</div>
+					</div>
+				)
+			}
+			<div class="article-content">
+				<Content />
+			</div>
 		</div>
-		<div class="tag-list">
-			{post.data.tags.map((tag) => <span class="tag">{tag}</span>)}
-		</div>
-		<div class="article-content">
-			<Content />
-		</div>
+		{
+			tocHeadings.length > 0 && (
+				<aside class="toc" aria-label="文章目录">
+					<p class="toc-title">目录</p>
+					<ol>
+						{tocHeadings.map((heading) => (
+							<li class={`toc-depth-${heading.depth}`}>
+								<a href={`#${heading.slug}`}>{heading.text}</a>
+							</li>
+						))}
+					</ol>
+				</aside>
+			)
+		}
 	</article>
 </Layout>
+
+<style>
+	.toc-depth-3 {
+		padding-left: 14px;
+	}
+</style>

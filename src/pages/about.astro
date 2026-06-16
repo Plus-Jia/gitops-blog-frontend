@@ -1,5 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
+
+const authors = await getCollection('authors');
 ---
 
 <Layout title="关于 | GitOps Blog" description="关于这个 Astro GitOps 博客">
@@ -11,4 +14,56 @@ import Layout from '../layouts/Layout.astro';
 			Astro、MDX、Content Collections、文章列表和详情页的基础骨架。
 		</p>
 	</section>
+
+	<section class="author-grid" aria-label="作者信息">
+		{
+			authors.map((author) => (
+				<article class="author-card">
+					{author.data.avatar ? (
+						<img
+							class="author-avatar"
+							src={author.data.avatar}
+							alt={`${author.data.name} 的头像`}
+						/>
+					) : (
+						<div class="author-avatar" aria-hidden="true" />
+					)}
+					<div>
+						<h2>{author.data.name}</h2>
+						{author.data.bio && <p>{author.data.bio}</p>}
+					</div>
+				</article>
+			))
+		}
+	</section>
 </Layout>
+
+<style>
+	.author-grid {
+		display: grid;
+		gap: 16px;
+		margin-top: 36px;
+	}
+
+	.author-card {
+		display: flex;
+		gap: 16px;
+		align-items: center;
+		border: 1px solid #dfddd4;
+		border-radius: 8px;
+		padding: 20px;
+		background: #fff;
+	}
+
+	.author-card h2 {
+		margin: 0 0 6px;
+		font-size: 1.2rem;
+		letter-spacing: 0;
+	}
+
+	.author-card p {
+		margin: 0;
+		color: #52606d;
+		line-height: 1.6;
+	}
+</style>

@@ -1,0 +1,40 @@
+---
+import { dateFormatter, type Post } from '../lib/content';
+
+interface Props {
+	post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<article class="post-card">
+	<div class="post-card-link">
+		<div>
+			<a class="category-link" href={`/categories/${encodeURIComponent(post.data.category)}`}>
+				{post.data.category}
+			</a>
+			<h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
+			<p>{post.data.description}</p>
+		</div>
+		<div>
+			{
+				post.data.tags.length > 0 && (
+					<div class="tag-list">
+						{post.data.tags.map((tag) => (
+							<a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+								{tag}
+							</a>
+						))}
+					</div>
+				)
+			}
+			<div class="post-meta">
+				<time datetime={post.data.pubDate.toISOString()}>
+					{dateFormatter.format(post.data.pubDate)}
+				</time>
+				{post.data.featured && <span>精选</span>}
+			</div>
+		</div>
+	</div>
+</article>

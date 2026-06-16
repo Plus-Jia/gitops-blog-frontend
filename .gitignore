@@ -4,6 +4,12 @@ dist/
 # generated types
 .astro/
 
+# build-time synced content from gitops-blog-content
+src/content/posts/
+src/content/authors/
+src/content/settings/
+public/uploads/
+
 # dependencies
 node_modules/
 

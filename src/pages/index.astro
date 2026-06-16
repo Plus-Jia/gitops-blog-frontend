@@ -1,16 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
+import PostCard from '../components/PostCard.astro';
 import Layout from '../layouts/Layout.astro';
+import { getAllCategories, getAllTags, getPublishedPosts } from '../lib/content';
 
-const posts = (await getCollection('posts', ({ data }) => !data.draft))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 3);
-
-const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
-	year: 'numeric',
-	month: 'long',
-	day: 'numeric',
-});
+const allPosts = await getPublishedPosts();
+const posts = allPosts.slice(0, 6);
+const tags = getAllTags(allPosts).slice(0, 12);
+const categories = getAllCategories(allPosts);
 ---
 
 <Layout title="GitOps Blog" description="记录云原生、GitOps 与工程实践的 Astro 博客">
@@ -24,29 +20,44 @@ const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
 	</section>
 
 	<section class="post-grid" aria-label="最新文章">
-		{
-			posts.map((post) => (
-				<a class="post-card" href={`/blog/${post.id}`}>
-					<div>
-						<p class="eyebrow">{post.data.category}</p>
-						<h2>{post.data.title}</h2>
-						<p>{post.data.description}</p>
-					</div>
-					<div>
-						<div class="tag-list">
-							{post.data.tags.map((tag) => (
-								<span class="tag">{tag}</span>
-							))}
-						</div>
-						<div class="post-meta">
-							<time datetime={post.data.pubDate.toISOString()}>
-								{dateFormatter.format(post.data.pubDate)}
-							</time>
-							{post.data.featured && <span>精选</span>}
-						</div>
-					</div>
-				</a>
-			))
-		}
+		{posts.map((post) => <PostCard post={post} />)}
+	</section>
+
+	<section class="home-taxonomy" aria-label="内容索引">
+		<div>
+			<h2>标签</h2>
+			<div class="tag-list">
+				{tags.map((tag) => <a class="tag" href={`/tags/${encodeURIComponent(tag.name)}`}>{tag.name}</a>)}
+			</div>
+		</div>
+		<div>
+			<h2>分类</h2>
+			<div class="tag-list">
+				{
+					categories.map((category) => (
+						<a class="tag" href={`/categories/${encodeURIComponent(category.name)}`}>
+							{category.name}
+						</a>
+					))
+				}
+			</div>
+		</div>
 	</section>
 </Layout>
+
+<style>
+	.home-taxonomy {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 26px;
+		margin-top: 52px;
+		border-top: 1px solid #dfddd4;
+		padding-top: 32px;
+	}
+
+	.home-taxonomy h2 {
+		margin: 0 0 14px;
+		font-size: 1.1rem;
+		letter-spacing: 0;
+	}
+</style>

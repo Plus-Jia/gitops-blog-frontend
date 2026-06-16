@@ -1,0 +1,31 @@
+---
+import PostCard from '../../components/PostCard.astro';
+import Layout from '../../layouts/Layout.astro';
+import { getAllTags, getPublishedPosts, postsByTag } from '../../lib/content';
+
+export async function getStaticPaths() {
+	const posts = await getPublishedPosts();
+
+	return getAllTags(posts).map((tag) => ({
+		params: { tag: tag.name },
+		props: {
+			tag: tag.name,
+			posts: postsByTag(posts, tag.name),
+		},
+	}));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<Layout title={`标签：${tag} | GitOps Blog`} description={`浏览标签 ${tag} 下的文章`}>
+	<section>
+		<p class="eyebrow">Tag</p>
+		<h1 class="page-title">{tag}</h1>
+		<p class="lede">共 {posts.length} 篇文章。</p>
+	</section>
+
+	<section class="post-grid" aria-label={`${tag} 标签文章列表`}>
+		{posts.map((post) => <PostCard post={post} />)}
+	</section>
+</Layout>
